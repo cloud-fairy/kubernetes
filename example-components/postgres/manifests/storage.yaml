@@ -1,0 +1,41 @@
+{{ $properties := (datasource "properties") }}
+{{ $project := (datasource "project") }}
+{{ $dependency := (datasource "dependency") }}
+{{ $connectors := (datasource "connectors") }}
+
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: "{{ $properties.localName }}-pv"
+  namespace: "{{ $project.namespace }}"
+  annotations:
+    cloudfairy.dev/project-id: "{{ $project.name }}"
+  labels:
+    app: "{{ $properties.localName }}"
+spec:
+  storageClassName: manual
+  capacity:
+    storage: "{{ $properties.storage_size }}"
+  accessModes:
+    - ReadWriteMany
+  hostPath:
+    path: "/data/postgresql"
+  
+---
+
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: "{{ $properties.localName }}-pvc"
+  namespace: "{{ $project.namespace }}"
+  annotations:
+    cloudfairy.dev/project-id: "{{ $project.name }}"
+  labels:
+    app: "{{ $properties.localName }}"
+spec:
+  storageClassName: manual
+  accessModes:
+    - ReadWriteMany
+  resources:
+    requests:
+      storage: "{{ $properties.storage_size }}"
