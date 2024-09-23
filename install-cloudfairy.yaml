@@ -1,0 +1,143 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: cloudfairy
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: cloudfairy-clusterrole
+  labels:
+    app: cloudfairy
+rules:
+  - apiGroups:
+      - "*"
+    resources:
+      - "*"
+    verbs:
+      - "*"
+  - nonResourceURLs:
+      - "*"
+    verbs:
+      - "*"
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: cloudfairy-clusterrolebinding
+  labels:
+    app: cloudfairy
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: cloudfairy-clusterrole
+subjects:
+  - kind: ServiceAccount
+    name: cloudfairy-serviceaccount
+    namespace: cloudfairy
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: cloudfairy-role
+  namespace: cloudfairy
+  labels:
+    app: cloudfairy
+rules:
+  - apiGroups:
+      - ""
+    resources:
+      - secrets
+      - configmaps
+    verbs:
+      - get
+      - list
+      - watch
+  - apiGroups:
+      - argoproj.io
+    resources:
+      - applications
+      - appprojects
+    verbs:
+      - create
+      - get
+      - list
+      - watch
+      - update
+      - patch
+      - delete
+  - apiGroups:
+      - ""
+    resources:
+      - events
+    verbs:
+      - create
+      - list
+  - apiGroups:
+      - apps
+    resources:
+      - deployments
+    verbs:
+      - get
+      - list
+      - watch
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: cloudfairy-rolebinding
+  namespace: cloudfairy
+  labels:
+    app: cloudfairy
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: cloudfairy-role
+subjects:
+  - kind: ServiceAccount
+    name: cloudfairy-serviceaccount
+    namespace: cloudfairy
+---
+apiVersion: v1
+kind: ServiceAccount
+automountServiceAccountToken: true
+metadata:
+  name: cloudfairy-serviceaccount
+  namespace: cloudfairy
+  labels:
+    app: cloudfairy
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: cloudfairy-controller
+  namespace: cloudfairy
+  labels:
+    app: cloudfairy-controller
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: cloudfairy-controller
+  template:
+    metadata:
+      labels:
+        app: cloudfairy-controller
+    spec:
+      serviceAccountName: cloudfairy-serviceaccount
+      containers:
+        - name: cloudfairy-controller
+          image: eavichay/cloudfairy:0.0.1
+          imagePullPolicy: Always
+          env:
+            - name: API_SERVER_URL
+              value: https://kubernetes.default.svc
+            - name: SERVICE_ACCOUNT_FOLDER
+              value: /var/run/secrets/kubernetes.io/serviceaccount
+          ports:
+            - containerPort: 1337
+              protocol: TCP
+          resources:
+            limits:
+              cpu: "0.5"
+              memory: "512Mi"
