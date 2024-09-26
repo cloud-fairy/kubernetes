@@ -1,7 +1,7 @@
 apiVersion: cloudfairy.dev/v1
 kind: CloudfairyLibraryModule
 metadata:
-  namespace: cloudfairy
+  namespace: example
   name: docker-container
 spec:
   vendor: cloudfairy

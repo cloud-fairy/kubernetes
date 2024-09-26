@@ -10,7 +10,7 @@ spec:
     - cloudfairy/docker-container
   to:
     - cloudfairy/docker-container
-  vendor: cloudfairy
+  vendor: example
   displayName: Docker to Docker Connector
   dependecies: []
   interace: []

@@ -1,0 +1,60 @@
+apiVersion: cloudfairy.dev/v1
+kind: CloudfairyLibraryModule
+metadata:
+  namespace: cloudfairy
+  name: argo-cd
+spec:
+  vendor: cloudfairy
+  displayName: ArgoCD
+  dependencies: []
+  interface: []
+  entry:
+    default: ./charts
+  validation: []
+    # - kind: query
+    #   name: "Check Deployment"
+    #   query: "deployment/{{ properties.localName }}"
+    #   condition: "{{status.availableReplicas}} >= 1"
+    #   timeout: 60000 # 60 seconds
+    # - kind: query
+    #   name: "Check Service"
+    #   query: "service/{{ properties.localName }}-svc"
+    #   condition: 'typeof {{status.loadBalancer}} !== "undefined"'
+    #   timeout: 60000 # 60 seconds
+  output: []
+    # - name: serviceName
+    #   query: "service/{{ properties.localName }}-svc"
+    #   value: "{{metadata.name}}"
+    # - name: servicePort
+    #   query: "service/{{ properties.localName }}-svc"
+    #   value: "{{spec.ports[0].port}}"
+    # - name: availabilty
+    #   query: "deployment/{{ properties.localName }}"
+    #   value: "{{status.availableReplicas}}"
+  runtime: helm
+  helmMapping:
+    properties:
+      in_cluster_secret: "inClusterSecret.enabled"
+      ingress_enabled: "argo-cd.ingress.enabled"
+      redis_ha: "argo-cd.redis-ha.enabled"
+
+  properties:
+    - name: in_cluster_secret
+      displayName: "Enable In-Cluster Secret"
+      type: boolean
+      defaultValue: true
+    - name: lables
+      displayName: "Labels"
+      type: keyvalue
+      defaultValue:
+        oidc: "cloudfairy.dev"
+        app: "argo-cd"
+    - name: ingress_enabled
+      displayName: "Enable Ingress"
+      type: boolean
+      defaultValue: true
+    - name: redis_ha
+      displayName: "High-Availability Redis"
+      type: boolean
+      defaultValue: true
+
