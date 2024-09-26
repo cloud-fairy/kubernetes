@@ -137,7 +137,7 @@ spec:
       serviceAccountName: cloudfairy-serviceaccount
       containers:
         - name: cloudfairy-controller
-          image: eavichay/cloudfairy:0.0.1
+          image: eavichay/cloudfairy:main
           imagePullPolicy: Always
           volumeMounts:
             - name: cloudfairy-controller-pvc
