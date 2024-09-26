@@ -1,10 +1,10 @@
 apiVersion: cloudfairy.dev/v1
 kind: CloudfairyLibraryModule
 metadata:
-  namespace: example
+  namespace: cloudfairy
   name: docker-container
 spec:
-  vendor: cloudfairy
+  vendor: example
   displayName: Docker (External Registry)
   dependencies: []
   interface:
