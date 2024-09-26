@@ -53,7 +53,7 @@ spec:
     - cloudfairy/docker-container
   to:
     - cloudfairy/postgres
-  vendor: cloudfairy
+  vendor: example
   displayName: Docker to Postgres Connector
   dependecies: []
   interace: []
