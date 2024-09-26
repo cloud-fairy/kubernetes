@@ -108,7 +108,7 @@ metadata:
     app: cloudfairy
 ---
 apiVersion: apps/v1
-kind: Deployment
+kind: StatefulSet
 metadata:
   name: cloudfairy-controller
   namespace: cloudfairy
@@ -116,9 +116,19 @@ metadata:
     app: cloudfairy-controller
 spec:
   replicas: 1
+  serviceName: cloudfairy-controller
   selector:
     matchLabels:
       app: cloudfairy-controller
+  volumeClaimTemplates:
+    - metadata:
+        name: cloudfairy-controller-pvc
+      spec:
+        accessModes:
+          - ReadWriteOnce
+        resources:
+          requests:
+            storage: 3Gi
   template:
     metadata:
       labels:
@@ -129,11 +139,16 @@ spec:
         - name: cloudfairy-controller
           image: eavichay/cloudfairy:0.0.1
           imagePullPolicy: Always
+          volumeMounts:
+            - name: cloudfairy-controller-pvc
+              mountPath: /mnt/cloudfairy
           env:
             - name: API_SERVER_URL
               value: https://kubernetes.default.svc
             - name: SERVICE_ACCOUNT_FOLDER
               value: /var/run/secrets/kubernetes.io/serviceaccount
+            - name: STORAGE_PATH
+              value: /mnt/cloudfairy
           ports:
             - containerPort: 1337
               protocol: TCP
@@ -141,3 +156,29 @@ spec:
             limits:
               cpu: "0.5"
               memory: "512Mi"
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: cloudfairy-controller-pv
+  labels:
+    app: cloudfairy
+    type: local
+spec:
+  capacity:
+    storage: 10Gi
+  accessModes:
+    - ReadWriteOnce
+  hostPath:
+    path: "/mnt/data"
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: cloudfairy-controller-pvc
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 3Gi
