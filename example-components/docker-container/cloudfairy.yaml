@@ -37,21 +37,26 @@ spec:
       displayName: "DockerHub Image or Image uri (incl. tag)"
       type: string
       defaultValue: nginx
+      group: "General"
     - name: container_port
       displayName: "Container Port"
       type: string
       defaultValue: "8080"
+      group: "General"
     - name: debug_port
       displayName: "Debug Port (-1 for none)"
       type: string
       defaultValue: "-1"
+      group: "Extra Settings"
     - name: is_exposed
       displayName: "Expose Container?"
       type: boolean
       defaultValue: true
+      group: General
     - name: resource_cpu
       displayName: "Resource CPU"
       type: options
+      group: "Extra Settings"
       options:
         - label: "0.5 vCPU"
           value: "500m"
@@ -65,6 +70,7 @@ spec:
           hint: "High resources"
       defaultValue: "500m"
     - name: env_vars
+      group: "Extra Settings"
       displayName: "Extra Environment Variables"
       type: keyvalue
       defaultValue:
