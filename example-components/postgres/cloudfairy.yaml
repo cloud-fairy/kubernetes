@@ -50,9 +50,9 @@ metadata:
     cloudfairy.dev/is-connector: "true"
 spec:
   from:
-    - cloudfairy/docker-container
+    - example/docker-container
   to:
-    - cloudfairy/postgres
+    - example/postgres
   vendor: example
   displayName: Docker to Postgres Connector
   dependecies: []
