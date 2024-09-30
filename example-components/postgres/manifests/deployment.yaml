@@ -30,9 +30,9 @@ spec:
                 name: {{ $properties.localName }}-secret
           volumeMounts:
             - mountPath: /var/lib/postgresql/data
-              name: postgresdata
+              name: {{ $properties.localName }}-vol
       volumes:
-        - name: postgresdata
+        - name: {{ $properties.localName }}-vol
           persistentVolumeClaim:
             claimName: {{ $properties.localName }}-pvc
 
