@@ -37,7 +37,7 @@ spec:
             value: "{{ $value }}"
         {{ end -}}
         {{- range $connector_type, $connector_list := $connectors -}}
-        {{- if or (eq $connector_type "cloudfairy_docker_to_docker") (eq $connector_type "cloudfairy_docker_to_postgres") -}}
+        {{- if or (eq $connector_type "example_docker_to_docker") (eq $connector_type "example_docker_to_postgres") -}}
         {{- range $map := $connector_list -}}
         {{- range $name, $value := $map }}
           - name: "{{ $name }}"
