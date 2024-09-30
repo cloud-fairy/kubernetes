@@ -1,0 +1,16 @@
+{{ $properties := (datasource "properties") }}
+{{ $project := (datasource "project") }}
+{{ $dependency := (datasource "dependency") }}
+{{ $connectors := (datasource "connectors") }}
+
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ $properties.localName }}-secret
+  namespace: {{ $project.namespace }}
+  labels:
+    app: postgres
+data:
+  POSTGRES_DB: ps_db
+  POSTGRES_USER: ps_user
+  POSTGRES_PASSWORD: {{ random.Alpha 16 }}

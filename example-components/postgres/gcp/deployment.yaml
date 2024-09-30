@@ -1,0 +1,57 @@
+{{ $properties := (datasource "properties") }}
+{{ $project := (datasource "project") }}
+{{ $dependency := (datasource "dependency") }}
+{{ $connectors := (datasource "connectors") }}
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ $properties.localName }}
+  namespace: {{ $project.namespace }}
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: {{ $properties.localName }}
+  template:
+    metadata:
+      namespace: {{ $project.namespace }}
+      labels:
+        app: {{ $properties.localName }}
+    spec:
+      containers:
+        - name: {{ $properties.localName }}
+          image: 'postgres:14'
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 5432
+          envFrom:
+            - configMapRef:
+                name: {{ $properties.localName }}-secret
+          volumeMounts:
+            - mountPath: /var/lib/postgresql/data
+              name: postgresdata
+      volumes:
+        - name: postgresdata
+          persistentVolumeClaim:
+            claimName: {{ $properties.localName }}-pvc
+
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ $properties.localName }}-svc
+  namespace: {{ $project.namespace }}
+  annotations:
+    cloudfairy.dev/project-id: {{ $project.name }}
+  labels:
+    app: {{ $properties.localName }}
+spec:
+  selector:
+    app: {{ $properties.localName }}
+  ports:
+    - protocol: TCP
+      port: 5432
+      targetPort: 5432
+  type: NodePort
