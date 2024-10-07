@@ -30,7 +30,7 @@ spec:
       query: "service/{{ properties.localName }}-svc"
       value: "{{spec.ports[0].port}}"
     - name: availabilty
-      query: "deployment/{{ properties.localName }}"
+      query: "statefulset/{{ properties.localName }}"
       value: "{{status.availableReplicas}}"
   properties:
     - name: registry_url
