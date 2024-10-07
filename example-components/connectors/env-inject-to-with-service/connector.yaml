@@ -1,7 +1,7 @@
 apiVersion: cloudfairy.dev/v1
 kind: CloudfairyLibraryModule
 metadata:
-  name: docker-to-docker
+  name: application-to-service
   namespace: cloudfairy
   annotations:
     cloudfairy.dev/is-connector: "true"
