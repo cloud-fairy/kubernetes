@@ -13,11 +13,10 @@ metadata:
   labels:
     app: "{{ $properties.localName }}"
 spec:
-  storageClassName: manual
   capacity:
     storage: "{{ $properties.storage_size }}"
   accessModes:
-    - ReadWriteMany
+    - ReadWriteOnce
   hostPath:
     path: "/data/postgresql"
   
@@ -33,9 +32,8 @@ metadata:
   labels:
     app: "{{ $properties.localName }}"
 spec:
-  storageClassName: manual
   accessModes:
-    - ReadWriteMany
+    - ReadWriteOnce
   resources:
     requests:
       storage: "{{ $properties.storage_size }}"
