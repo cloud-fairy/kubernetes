@@ -9,6 +9,7 @@ spec:
   dependencies: []
   interface:
     - cloudfairy.dev/env-injectable
+    - cloudfairy.dev/with-service
   entry:
     default: ./manifests
   validation:
