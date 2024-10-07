@@ -10,7 +10,7 @@ spec:
     - cloudfairy.dev/env-injectable
   to:
     - cloudfairy.dev/with-service
-  vendor: example
+  vendor: cloudfairy
   displayName: Service/Application to Service Connector
   dependecies: []
   interace: []
@@ -29,3 +29,35 @@ spec:
       displayName: "Evironment variable for Port"
       type: string
       defaultValue: "SVC_PORT"
+---
+apiVersion: cloudfairy.dev/v1
+kind: CloudfairyLibraryModule
+metadata:
+  name: application-to-user-password
+  namespace: cloudfairy
+  annotations:
+    cloudfairy.dev/is-connector: "true"
+spec:
+  from:
+    - cloudfairy.dev/env-injectable
+  to:
+    - cloudfairy.dev/with-service
+  vendor: cloudfairy
+  displayName: Service/Application to module with User and Password
+  dependecies: []
+  interace: []
+  validation: []
+  output:
+    - name: "{{ properties.env_user }}"
+      value: "{{ dependency.to_module.user }}"
+    - name: "{{ properties.env_password }}"
+      value: "{{ dependency.to_module.password }}"
+  properties:
+    - name: env_user
+      displayName: "Evironment variable for Database user"
+      type: string
+      defaultValue: "DB_USER"
+    - name: env_password
+      displayName: "Evironment variable for Database password"
+      type: string
+      defaultValue: "DB_PASS"
