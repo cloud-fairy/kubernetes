@@ -42,6 +42,7 @@ spec:
     - cloudfairy.dev/env-injectable
   to:
     - cloudfairy.dev/with-service
+    - cloudfairy.dev/with-user-and-password
   vendor: cloudfairy
   displayName: Service/Application to module with User and Password
   dependecies: []
