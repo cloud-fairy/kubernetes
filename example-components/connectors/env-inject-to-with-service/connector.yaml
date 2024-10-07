@@ -9,7 +9,7 @@ spec:
   from:
     - cloudfairy.dev/env-injectable
   to:
-    - loudfairy.dev/with-service
+    - cloudfairy.dev/with-service
   vendor: example
   displayName: Service/Application to Service Connector
   dependecies: []
