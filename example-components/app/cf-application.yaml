@@ -1,0 +1,144 @@
+apiVersion: cloudfairy.dev/v1
+kind: CloudfairyLibraryModule
+metadata:
+  namespace: cloudfairy
+  name: application
+spec:
+  vendor: cloudfairy
+  displayName: Application
+  dependencies: []
+  interface:
+    - cloudfairy.dev/env-injectable
+  entry:
+    default: ./manifests
+  validation:
+    - kind: query
+      name: "Check Deployment"
+      query: "deployment/{{ properties.localName }}"
+      condition: "{{status.availableReplicas}} >= {{ properties.replicas}}"
+      timeout: 60000 # 60 seconds
+    - kind: query
+      name: "Check Service"
+      query: "service/{{ properties.localName }}-svc"
+      condition: 'typeof {{status.loadBalancer}} !== "undefined"'
+      timeout: 60000 # 60 seconds
+  output:
+    - name: serviceName
+      query: "service/{{ properties.localName }}-svc"
+      value: "{{metadata.name}}"
+    - name: servicePort
+      query: "service/{{ properties.localName }}-svc"
+      value: "{{spec.ports[0].port}}"
+    - name: availabilty
+      query: "deployment/{{ properties.localName }}"
+      value: "{{status.availableReplicas}}"
+  properties:
+    - name: registry_url
+      displayName: "Registry URL"
+      description: "Image registry, keep empty for local/default"
+      type: string
+      defaultValue: ""
+    - name: image_name
+      displayName: "Docker image name (opt. tag)"
+      type: string
+      defaultValue: nginx
+    - name: replicas
+      displayName: "Replicas"
+      type: number
+      defaultValue: 1
+    - name: container_port
+      displayName: "Container Port"
+      type: string
+      defaultValue: "8080"
+    - name: additional_port
+      displayName: "Additional Port (-1 for disabled)"
+      description: "-1 for none"
+      type: string
+      defaultValue: "-1"
+    - name: debug_port
+      displayName: "Debug Port (-1 for none)"
+      type: string
+      defaultValue: "-1"
+    - name: is_exposed
+      displayName: "Expose Container (ingress)?"
+      type: boolean
+      defaultValue: false
+    - name: create_service_account
+      displayName: "Create Service Account"
+      type: boolean
+      defaultValue: false
+    - name: persistent_volume
+      displayName: "Persistent Volume"
+      type: options
+      defaultValue: "0Gi"
+      options: 
+        - label: "Disabled"
+          value: "0Gi"
+        - label: "2 Gi"
+          value: "2Gi"
+        - label: "5 Gb"
+          value: "5Gi"
+        - label: "10 Gb"
+          value: "10Gi"
+          hint: "High resources"
+        - label: "20 Gb"
+          value: "20Gi"
+          hint: "High resources"
+        - label: "100 Gb"
+          value: "100Gi"
+          hint: "High resources"
+        - label: "1 Tb"
+          value: "1Ti"
+          hint: "High resources"
+    - name: persistent_volume_path
+      displayName: "Persistent Volume Mount Path (applicable only when enabled)"
+      type: string
+      defaultValue: "/mnt/data"
+    - name: resource_cpu
+      displayName: "Resource CPU"
+      type: options
+      options:
+        - label: "0.1 vCPU"
+          value: "100m"
+        - label: "0.25 vCPU"
+          value: "250m"
+        - label: "0.5 vCPU"
+          value: "500m"
+          hint: "Low resources"
+        - label: "1 vCPU"
+          value: "1000m"
+        - label: "2 vCPU"
+          value: "2000m"
+        - label: "4 vCPU"
+          value: "4Gi"
+          hint: "High resources"
+        - label: "8 vCPU"
+          value: "8Gi"
+          hint: "High resources"
+      defaultValue: "250m"
+    - name: resource_memory
+      type: options
+      displayName: "Resource Memory"
+      defaultValue: "512Mi"
+      options:
+        - label: "256Mi"
+          value: "256Mi"
+        - label: "512Mi"
+          value: "512Mi"
+          hint: "Low resources"
+        - label: "1Gi"
+          value: "1Gi"
+        - label: "2Gi"
+          value: "2Gi"
+          hint: "High resources"
+        - label: "4Gi"
+          value: "4Gi"
+          hint: "High resources"
+        - label: "8Gi"
+          value: "8Gi"
+          hint: "High resources"
+    - name: env_vars
+      displayName: "Extra Environment Variables"
+      type: keyvalue
+      defaultValue:
+        cloudfairy: "true"

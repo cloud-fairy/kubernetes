@@ -1,0 +1,118 @@
+{{ $properties := (datasource "properties") }}
+{{ $project := (datasource "project") }}
+{{ $dependency := (datasource "dependency") }}
+{{ $connectors := (datasource "connectors") }}
+
+apiVersion: v1
+kind: StatefulSet
+metadata:
+  name: {{ $properties.localName }}
+  namespace: {{ $project.namespace }}
+  metadata:
+    labels:
+      app: {{ $properties.localName }}
+spec:
+  replicas: {{ $properties.replicas }}
+  selector:
+    matchLabels:
+      app: {{ $properties.localName }}
+{{- if (ne $properties.persistent_volume "0Gi") -}}
+    volumeClaimTemplates:
+      - metadata:
+          name: {{ $properties.localName }}-pvc
+        spec:
+          accessModes:
+            - ReadWriteOnce
+          resources:
+            requests:
+              storage: {{ $properties.persistent_volume }}
+{{- end -}}
+    template:
+      metadata:
+        labels:
+          app: {{ $properties.localName }}
+      spec:
+{{- if $properties.create_service_account -}}
+        serviceAccountName: {{ $properties.localName }}-sa
+{{- end -}}
+        containers:
+          - name: {{ $properties.localName }}
+            image: {{- $properties.registry_url -}}{{- if (ne $properties.registry_url "") -}}/{{- end -}}{{- $properties.image_name -}}
+            imagePullPolicy: Always
+{{- if (ne $properties.persistent_volume "0Gi") -}}
+            volumeMounts:
+              - name: {{ $properties.localName }}-pvc
+                mountPath: {{ $properties.persistent_volume_path }}
+{{- end -}}
+            ports:
+              - containerPort: {{ $properties.container_port }}
+                protocol: TCP
+{{- if (ne $properties.additional_port "-1") }}
+              - containerPort: {{ $properties.additional_port }}
+                protocol: TCP
+{{- end }}
+{{- if (ne $properties.debug_port "-1") }}
+              - containerPort: {{ $properties.debug_port }}
+                protocol: TCP
+{{- end }}
+            resources:
+              limits:
+                cpu: "{{ $properties.resource_cpu }}"
+                memory: "{{ $properties.resource_memory }}"
+            env: {{ range $key, $value := $properties.env_vars }}
+              - name: "{{ $key }}"
+                value: "{{ $value }}"
+            {{ end -}}
+            {{- range $connector_type, $connector_list := $connectors -}}
+            {{- range $map := $connector_list -}}
+            {{- range $name, $value := $map }}
+              - name: "{{ $name }}"
+                value: "{{ $value }}"
+            {{ end -}}
+            {{- end -}}
+            {{- end }}
+{{- if (ne $properties.persistent_volume "0Gi") -}}
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: {{ $properties.localName }}-pv
+  namespace: {{ $project.namespace }}
+  labels:
+    app: {{ $properties.localName }}
+    type: local
+spec:
+  capacity:
+    storage: {{ $properties.persistent_volume }}
+  accessModes:
+    - ReadWriteOnce
+  hostPath:
+    path: "{{ $properties.persistent_volume_path }}/{{ $properties.localName }}"
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: {{ $properties.localName }}-pvc
+  namespace: {{ $project.namespace }}
+  labels:
+    app: {{ $properties.localName }}
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: {{ $properties.persistent_volume }}
+{{- end -}}
+{{- if $properties.create_service_account -}}
+---
+apiVersion: v1
+kind: ServiceAccount
+automountServiceAccountToken: true
+metadata:
+  name: {{ $properties.localName }}-sa
+  namespace: {{ $project.namespace }}
+  labels:
+    app: {{ $properties.localName }}
+{{- end -}}
+{{- if $properties.is_exposed -}}
+{{- end -}}
