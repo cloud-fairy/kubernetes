@@ -14,7 +14,7 @@ spec:
   validation:
     - kind: query
       name: "Check Deployment"
-      query: "deployment/{{ properties.localName }}"
+      query: "statefulset/{{ properties.localName }}"
       condition: "{{status.availableReplicas}} >= {{ properties.replicas}}"
       timeout: 60000 # 60 seconds
     - kind: query
