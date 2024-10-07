@@ -1,58 +1,60 @@
-{{ $properties := (datasource "properties") }}
-{{ $project := (datasource "project") }}
-{{ $dependency := (datasource "dependency") }}
-{{ $connectors := (datasource "connectors") }}
+{{- $properties := (datasource "properties") -}}
+{{- $project := (datasource "project") -}}
+{{- $dependency := (datasource "dependency") -}}
+{{- $connectors := (datasource "connectors") -}}
 
-apiVersion: v1
+apiVersion: apps/v1
 kind: StatefulSet
 metadata:
   name: {{ $properties.localName }}
   namespace: {{ $project.namespace }}
-  metadata:
-    labels:
-      app: {{ $properties.localName }}
+  labels:
+    app: {{ $properties.localName }}
 spec:
   replicas: {{ $properties.replicas }}
   selector:
     matchLabels:
       app: {{ $properties.localName }}
-{{- if (ne $properties.persistent_volume "0Gi") -}}
-    volumeClaimTemplates:
-      - metadata:
-          name: {{ $properties.localName }}-pvc
-        spec:
-          accessModes:
-            - ReadWriteOnce
-          resources:
-            requests:
-              storage: {{ $properties.persistent_volume }}
-{{- end -}}
-    template:
-      metadata:
-        labels:
-          app: {{ $properties.localName }}
+{{- if (ne $properties.persistent_volume "0Gi") }}
+  volumeClaimTemplates:
+    - metadata:
+        name: {{ $properties.localName }}-pvc
       spec:
-{{- if $properties.create_service_account -}}
-        serviceAccountName: {{ $properties.localName }}-sa
-{{- end -}}
+        accessModes:
+          - ReadWriteOnce
+        resources:
+          requests:
+            storage: {{ $properties.persistent_volume | quote }}
+{{- end }}
+  template:
+    metadata:
+      labels:
+        app: {{ $properties.localName }}
+    spec:
+{{- if $properties.create_service_account }}
+        serviceAccountName: "{{ $properties.localName }}-sa"
+{{- end }}
         containers:
           - name: {{ $properties.localName }}
-            image: {{- $properties.registry_url -}}{{- if (ne $properties.registry_url "") -}}/{{- end -}}{{- $properties.image_name -}}
+            image: "{{ $properties.registry_url -}}{{- if (ne $properties.registry_url "") -}}/{{- end -}}{{- $properties.image_name }}"
             imagePullPolicy: Always
-{{- if (ne $properties.persistent_volume "0Gi") -}}
+{{- if (ne $properties.persistent_volume "0Gi") }}
             volumeMounts:
-              - name: {{ $properties.localName }}-pvc
+              - name: "{{ $properties.localName }}-pvc"
                 mountPath: {{ $properties.persistent_volume_path }}
-{{- end -}}
+{{- end }}
             ports:
               - containerPort: {{ $properties.container_port }}
+                name: "container-port"
                 protocol: TCP
 {{- if (ne $properties.additional_port "-1") }}
               - containerPort: {{ $properties.additional_port }}
+                name: "additional-port"
                 protocol: TCP
 {{- end }}
 {{- if (ne $properties.debug_port "-1") }}
               - containerPort: {{ $properties.debug_port }}
+                name: "debug-port"
                 protocol: TCP
 {{- end }}
             resources:
@@ -62,7 +64,7 @@ spec:
             env: {{ range $key, $value := $properties.env_vars }}
               - name: "{{ $key }}"
                 value: "{{ $value }}"
-            {{ end -}}
+            {{ end }}
             {{- range $connector_type, $connector_list := $connectors -}}
             {{- range $map := $connector_list -}}
             {{- range $name, $value := $map }}
@@ -71,7 +73,7 @@ spec:
             {{ end -}}
             {{- end -}}
             {{- end }}
-{{- if (ne $properties.persistent_volume "0Gi") -}}
+{{- if (ne $properties.persistent_volume "0Gi") }}
 ---
 apiVersion: v1
 kind: PersistentVolume
@@ -102,8 +104,8 @@ spec:
   resources:
     requests:
       storage: {{ $properties.persistent_volume }}
-{{- end -}}
-{{- if $properties.create_service_account -}}
+{{- end }}
+{{- if $properties.create_service_account }}
 ---
 apiVersion: v1
 kind: ServiceAccount

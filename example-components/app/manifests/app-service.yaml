@@ -1,7 +1,7 @@
-{{ $properties := (datasource "properties") }}
-{{ $project := (datasource "project") }}
-{{ $dependency := (datasource "dependency") }}
-{{ $connectors := (datasource "connectors") }}
+{{- $properties := (datasource "properties") -}}
+{{- $project := (datasource "project") -}}
+{{- $dependency := (datasource "dependency") -}}
+{{- $connectors := (datasource "connectors") -}}
 apiVersion: v1
 kind: Service
 metadata:
@@ -17,43 +17,44 @@ spec:
   ports:
     - protocol: TCP
       port: {{ $properties.container_port }}
+      name: "container-port"
       targetPort: {{ $properties.container_port }}
-{{- if eq $properties.additional_port "-1" -}}
+{{- if eq $properties.additional_port "-1" }}
     # No additional port
-{{- else -}}
+{{- else }}
     # Additional port
     - protocol: TCP
       port: {{ $properties.additional_port }}
+      name: "additional-port"
       targetPort: {{ $properties.additional_port }}
-{{- end -}}
-{{- if eq $properties.debug_port "-1" -}}
+{{- end }}
+{{- if eq $properties.debug_port "-1" }}
     # No debug port
-{{- else -}}
+{{- else }}
     # Debug port
     - protocol: TCP
       port: {{ $properties.debug_port }}
+      name: "debug-port"
       targetPort: {{ $properties.debug_port }}
-{{- end -}}
+{{- end }}
   type: NodePort
-{{- if eq $properties.is_exposed true -}}
+{{- if eq $properties.is_exposed true }}
 ---
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
-  name: {{ $properties.localName }}-ingress
+  name: "{{ $properties.localName }}-ingress"
   namespace: {{ $project.namespace }}
-  annotations:
-    kubernetes.io/ingress.class: nginx
 spec:
   rules:
-    - host: {{ $properties.localName }}.localhost
+    - host: "{{ $properties.localName }}.localhost"
       http:
         paths:
           - path: /
             pathType: Prefix
             backend:
               service:
-                name: {{ $properties.localName }}-svc
+                name: "{{ $properties.localName }}-svc"
                 port:
                   number: {{ $properties.container_port }}
     - http:
@@ -62,18 +63,18 @@ spec:
             pathType: Prefix
             backend:
               service:
-                name: {{ $properties.localName }}-svc
+                name: "{{ $properties.localName }}-svc"
                 port:
                   number: {{ $properties.container_port }}
-{{- if (ne $properties.debug_port "-1") -}}
-    - host: {{ $properties.localName }}.localhost
+{{- if (ne $properties.debug_port "-1") }}
+    - host: "{{ $properties.localName }}.localhost"
       http:
         paths:
           - path: /
             pathType: Prefix
             backend:
               service:
-                name: {{ $properties.localName }}-svc
+                name: "{{ $properties.localName }}-svc"
                 port:
                   number: {{ $properties.debug_port }}
     - http:
@@ -82,19 +83,19 @@ spec:
             pathType: Prefix
             backend:
               service:
-                name: {{ $properties.localName }}-svc
+                name: "{{ $properties.localName }}-svc"
                 port:
                   number: {{ $properties.debug_port }}
-{{- end -}}
-{{- if (ne $properties.additional_port "-1") -}}
-    - host: {{ $properties.localName }}.localhost
+{{- end }}
+{{- if (ne $properties.additional_port "-1") }}
+    - host: "{{ $properties.localName }}.localhost"
       http:
         paths:
           - path: /
             pathType: Prefix
             backend:
               service:
-                name: {{ $properties.localName }}-svc
+                name: "{{ $properties.localName }}-svc"
                 port:
                   number: {{ $properties.additional_port }}
     - http:
@@ -103,7 +104,7 @@ spec:
             pathType: Prefix
             backend:
               service:
-                name: {{ $properties.localName }}-svc
+                name: "{{ $properties.localName }}-svc"
                 port:
                   number: {{ $properties.additional_port }}
 {{- end -}}
