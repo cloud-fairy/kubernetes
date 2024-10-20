@@ -1,0 +1,33 @@
+apiVersion: cloudfairy.dev/v1
+kind: CloudfairyLibraryModule
+metadata:
+  name: application-to-bitnami-mysql
+  namespace: cloudfairy
+  annotations:
+    cloudfairy.dev/is-connector: "true"
+spec:
+  from:
+    - cloudfairy/application
+  to:
+    - bitnami/bitnami-mysql
+  vendor: cloudfairy
+  displayName: Service/Application to Bitnami MySQL Connector
+  dependecies: []
+  interace: []
+  validation: []
+  output:
+    - name: "{{ properties.env_host_name }}"
+      query: "service/{{ properties.to_module.localName }}"
+      value: "{{ dependency.spec.clusterIP }}"
+    - name: "{{ properties.env_port_name }}"
+      query: "service/{{ properties.to_module.localName }}"
+      value: "{{ dependency.spec.ports[0].port }}"
+  properties:
+    - name: env_host_name
+      displayName: "Evironment variable for Host Name"
+      type: string
+      defaultValue: "MYSQL_HOST"
+    - name: env_port_name
+      displayName: "Evironment variable for Port"
+      type: string
+      defaultValue: "MYSQL_PORT"
