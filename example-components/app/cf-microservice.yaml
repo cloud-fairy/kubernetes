@@ -2,10 +2,10 @@ apiVersion: cloudfairy.dev/v1
 kind: CloudfairyLibraryModule
 metadata:
   namespace: cloudfairy
-  name: application
+  name: microservice
 spec:
   vendor: cloudfairy
-  displayName: Application
+  displayName: Microservice
   dependencies: []
   interface:
     - cloudfairy.dev/env-injectable
