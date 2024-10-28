@@ -1,0 +1,12 @@
+{{- $properties := (datasource "properties") -}}
+{{- $project := (datasource "project") -}}
+
+apiVersion: s3.aws.upbound.io/v1beta1
+kind: Bucket
+metadata:
+  generateName: {{ $properties.localName }}-crossplane-bucket
+spec:
+  forProvider:
+    region: eu-central-1
+  providerConfigRef:
+    name: default

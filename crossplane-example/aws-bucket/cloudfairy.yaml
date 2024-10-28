@@ -1,0 +1,20 @@
+apiVersion: cloudfairy.dev/v1
+kind: CloudfairyLibraryModule
+metadata:
+  namespace: cloudfairy
+  name: aws-bucket
+spec:
+  vendor: cloudfairy
+  displayName: AWS Object Storage S3
+  dependencies: []
+  interface: []
+  entry:
+    default: ./manifests
+  validation: []
+  output: []
+  properties:
+    - name: bucket_name
+      displayName: "Bucket Name"
+      type: string
+      defaultValue: ""
+
